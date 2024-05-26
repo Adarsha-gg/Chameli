@@ -1,0 +1,72 @@
+# COPIED FROM THE MAIN REPO :)
+
+
+Here is my solidity ERC20 token.
+
+```
+// SPDX-License-Identifier : MIT
+
+pragma solidity ^0.8.18;
+
+import {ERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+
+
+contract Chameli is ERC20{
+
+    constructor(uint256 initialSupply) ERC20("ChameliToken", "CT"){
+        _mint(msg.sender, initialSupply);
+    }
+}
+```
+
+And here our my first couple of tests written in solidity.
+
+```
+//SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.16;
+
+import {Test} from "../lib/forge-std/src/Test.sol";
+import {Chameli} from "../src/ChameliToken.sol";
+import {DeployChameli} from "../script/DeployToken.s.sol";
+
+contract ChameliTester is Test{
+    Chameli public chameli;
+    DeployChameli public deployChameli;
+
+    address bob = makeAddr("bob");
+    address mina = makeAddr("mina");
+
+    uint256 public constant MONI = 199 ether;
+
+    function setUp() public {
+        deployChameli = new DeployChameli();
+        chameli = deployChameli.run();
+        vm.prank(msg.sender);
+        chameli.transfer(bob, MONI);
+
+    }
+
+    function testBalance() public {
+        assert(MONI == chameli.balanceOf(bob));
+    }
+
+    function testAllowance() public {
+        uint256 testallowance = 100;
+        vm.prank(bob);
+        chameli.approve(mina, testallowance);
+        vm.prank(mina);
+        chameli.transferFrom(bob, mina, 40);
+        assertEq(chameli.balanceOf(mina), 40);
+        assertEq(chameli.balanceOf(bob), MONI - 40);
+    }
+}
+
+```
+
+Can you write the rest of the tests? Please include tests for:
+
+- Allowances
+- transfers
+- anything else that might be important
+
